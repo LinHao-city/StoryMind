@@ -1,4 +1,4 @@
----
+﻿---
 name: character-rigging
 description: Build data-driven 2D character rigs for local animation: parts, pivots, layers, constraints, views, and reusable rig packages.
 license: MIT
@@ -6,7 +6,7 @@ license: MIT
 
 # Character Rigging
 
-Use this skill when building OpenMontage `rig_plan` artifacts or renderer input
+Use this skill when building StoryMind `rig_plan` artifacts or renderer input
 for local 2D character animation.
 
 ## Proven Patterns

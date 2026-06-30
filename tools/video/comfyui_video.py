@@ -1,4 +1,4 @@
-"""ComfyUI video generation via a local or remote ComfyUI server.
+﻿"""ComfyUI video generation via a local or remote ComfyUI server.
 
 Supports text-to-video and image-to-video using WAN 2.2 14B with
 4-step LightX2V LoRA acceleration.  Custom workflows are accepted
@@ -262,7 +262,7 @@ class ComfyUIVideo(BaseTool):
             return ToolResult(
                 success=False,
                 error=(
-                    "Custom ComfyUI workflows require output_node so OpenMontage "
+                    "Custom ComfyUI workflows require output_node so StoryMind "
                     "knows which ComfyUI node to download artifacts from."
                 ),
             )

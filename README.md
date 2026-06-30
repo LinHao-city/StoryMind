@@ -1,10 +1,12 @@
-<p align="center">
-  <img src="assets/logo.png" alt="OpenMontage" width="200">
+﻿<p align="center">
+  <img src="assets/logo.png" alt="StoryMind 分镜导影" width="200">
 </p>
 
-<h1 align="center">OpenMontage</h1>
+<h1 align="center">StoryMind 分镜导影</h1>
 
-<p align="center"><strong>An open-source, agentic AI video production system.</strong></p>
+<p align="center"><strong>Agentic AI video production with cinematography-aware storyboard planning and cross-shot consistency.</strong></p>
+
+<p align="center"><em>AI 驱动的专业分镜规划 · 角色跨镜头一致性 · 全链路影像生产系统</em></p>
 
 <p align="center">
   <a href="#start-from-a-video-you-already-love">Paste A Video</a> &nbsp;·&nbsp;
@@ -24,13 +26,13 @@
 
 Turn your AI coding assistant into a full video production studio. Describe what you want in plain language — your agent handles research, scripting, asset generation, editing, and final composition.
 
-**Important distinction:** OpenMontage can make image-based videos, but it can also make a real **video video** for free/open-source workflows: the agent builds a corpus from free stock footage and open archives, retrieves actual motion clips, edits them into a timeline, and renders a finished piece. That is not the usual "animate a handful of stills and call it video" trick.
+**Important distinction:** StoryMind can make image-based videos, but it can also make a real **video video** for free/open-source workflows: the agent builds a corpus from free stock footage and open archives, retrieves actual motion clips, edits them into a timeline, and renders a finished piece. That is not the usual "animate a handful of stills and call it video" trick.
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/f77ce7a4-68b8-4f94-a287-e94bf50a32e1" width="100%" controls></video>
 </div>
 
-> **"SIGNAL FROM TOMORROW"** — a cinematic sci-fi trailer fully produced through OpenMontage: concept, script, scene plan, Veo-generated motion clips, soundtrack, and Remotion composition.
+> **"SIGNAL FROM TOMORROW"** — a cinematic sci-fi trailer fully produced through StoryMind: concept, script, scene plan, Veo-generated motion clips, soundtrack, and Remotion composition.
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/8daca07f-cdf8-4bec-89c3-9dc2176363fa" width="100%" controls></video>
@@ -42,7 +44,7 @@ Turn your AI coding assistant into a full video production studio. Describe what
   <video src="https://github.com/user-attachments/assets/e03b5d1f-1199-4093-9f31-a43aa9da2c68" width="100%" controls></video>
 </div>
 
-> **"The Library at Alexandria"** — a 70-second history elegy. Five hand-authored scenes set to narration and a free Pixabay strings score. Total cost: **$0.02**. Built through OpenMontage's atelier (bespoke) composition mode.
+> **"The Library at Alexandria"** — a 70-second history elegy. Five hand-authored scenes set to narration and a free Pixabay strings score. Total cost: **$0.02**. Built through StoryMind's atelier (bespoke) composition mode.
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/8a6d2cc3-7ad2-46f5-922f-a8e3e5848d9f" width="100%" controls></video>
@@ -68,7 +70,7 @@ Turn your AI coding assistant into a full video production studio. Describe what
 
 Starting from a reference video is often faster than starting from a blank prompt.
 
-OpenMontage can start from a **YouTube video, Short, Reel, TikTok, or local clip** and turn it into a grounded production plan:
+StoryMind can start from a **YouTube video, Short, Reel, TikTok, or local clip** and turn it into a grounded production plan:
 
 1. **Paste a reference video**
 2. **The agent analyzes transcript, pacing, scenes, keyframes, and style**
@@ -114,8 +116,8 @@ sudo apt install ffmpeg
 ### Install & Run
 
 ```bash
-git clone https://github.com/LinHao-city/OpenMontage.git
-cd OpenMontage
+git clone https://github.com/LinHao-city/StoryMind.git
+cd StoryMind
 
 # Linux / macOS
 make setup
@@ -308,9 +310,9 @@ Each stage has a dedicated **director skill** — a markdown instruction file th
 
 ---
 
-## Why OpenMontage?
+## Why StoryMind?
 
-Most AI video tools give you a single clip from a prompt. OpenMontage gives you an **end-to-end production pipeline** — the same structured process a real production team follows, automated by your AI agent.
+Most AI video tools give you a single clip from a prompt. StoryMind gives you an **end-to-end production pipeline** — the same structured process a real production team follows, automated by your AI agent.
 
 - **12 production pipelines** — explainers, talking heads, screen demos, cinematic trailers, animations, podcasts, localization, documentary montages, and more
 - **55+ production tools** — spanning video generation, image creation, text-to-speech, music, audio mixing, subtitles, enhancement, analysis, and AI storyboard planning
@@ -328,7 +330,7 @@ Most AI video tools give you a single clip from a prompt. OpenMontage gives you 
 
 ## How It Works
 
-OpenMontage uses an **agent-first architecture**. There is no code orchestrator. Your AI coding assistant IS the orchestrator.
+StoryMind uses an **agent-first architecture**. There is no code orchestrator. Your AI coding assistant IS the orchestrator.
 
 ```
 You: "Make a cinematic sci-fi short about an alien signal"
@@ -379,7 +381,7 @@ Final video output — only if self-review passes
 ## Architecture
 
 ```
-OpenMontage/
+StoryMind/
 ├── tools/              # 55+ Python tools (the agent's hands)
 │   ├── video/          # Video gen tools (Leihuo Seedance, Pexels, etc.) + compose, stitch, trim
 │   ├── audio/          # TTS providers (Leihuo Mimo, Piper) + music, mixing, enhancement
@@ -409,7 +411,7 @@ OpenMontage/
 
 ```
 Layer 1: tools/ + pipeline_defs/     "What exists" — executable capabilities + orchestration
-Layer 2: skills/                     "How to use it" — OpenMontage conventions and quality bars
+Layer 2: skills/                     "How to use it" — StoryMind conventions and quality bars
 Layer 3: .agents/skills/             "How it works" — external technology knowledge packs
 ```
 
@@ -577,7 +579,7 @@ Every tool selection runs through a 7-dimension scoring engine: task fit (30%), 
 
 ## Agent Compatibility
 
-OpenMontage works with any AI coding assistant that can read files and execute Python.
+StoryMind works with any AI coding assistant that can read files and execute Python.
 
 | Platform | Config File |
 | -------- | ----------- |
@@ -591,7 +593,7 @@ OpenMontage works with any AI coding assistant that can read files and execute P
 
 ## Contributing
 
-OpenMontage is built to be extended.
+StoryMind is built to be extended.
 
 ### Adding a New Tool
 
@@ -638,4 +640,4 @@ City University of Hong Kong (Dongguan)
 
 ---
 
-**OpenMontage** — Production-grade AI video with professional cinematography planning, orchestrated by your AI assistant.
+**StoryMind** — Production-grade AI video with professional cinematography planning, orchestrated by your AI assistant.

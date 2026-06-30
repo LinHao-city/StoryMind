@@ -1,4 +1,4 @@
-"""Scene Consistency Tracker — cross-shot visual anchor system.
+﻿"""Scene Consistency Tracker — cross-shot visual anchor system.
 
 Inspired by Jellyfish (github.com/Forget-C/Jellyfish) consistency management.
 
@@ -60,7 +60,7 @@ class SceneConsistencyTracker(BaseTool):
     version = "1.0.0"
     tier = ToolTier.CORE
     capability = "planning"
-    provider = "openmontage"
+    provider = "StoryMind"
     stability = ToolStability.BETA
     execution_mode = ExecutionMode.SYNC
     determinism = Determinism.DETERMINISTIC

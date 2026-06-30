@@ -1,4 +1,4 @@
-# Short-Form Video Pipeline (TikTok / Reels / Shorts)
+﻿# Short-Form Video Pipeline (TikTok / Reels / Shorts)
 
 > Sources: TikTok Creator Portal, Instagram for Business blog, YouTube Shorts documentation,
 > Hootsuite Social Trends Report 2025, OpusClip retention data 2025, Shortimize 35B Shorts
@@ -190,7 +190,7 @@ MAX SIZE:    500 MB (desktop), 287.6 MB (iOS), 72 MB (Android)
 [55-60s] CTA + LOOP: End connects back to start for replay
 ```
 
-## Applying to OpenMontage
+## Applying to StoryMind
 
 When building short-form content:
 

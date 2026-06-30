@@ -1,4 +1,4 @@
-"""ComfyUI image generation via a local or remote ComfyUI server.
+﻿"""ComfyUI image generation via a local or remote ComfyUI server.
 
 Default workflow: FLUX 2 Dev (NVFP4) with Mistral text encoder.
 Supports custom workflows via the ``workflow_json`` input.
@@ -161,7 +161,7 @@ class ComfyUIImage(BaseTool):
             return ToolResult(
                 success=False,
                 error=(
-                    "Custom ComfyUI workflows require output_node so OpenMontage "
+                    "Custom ComfyUI workflows require output_node so StoryMind "
                     "knows which ComfyUI node to download artifacts from."
                 ),
             )

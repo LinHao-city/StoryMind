@@ -1,4 +1,4 @@
-"""Wikimedia Commons stock media adapter.
+﻿"""Wikimedia Commons stock media adapter.
 
 Provides image and video search over Wikimedia Commons using the
 MediaWiki API. Commons is a uniquely useful documentary source because
@@ -16,7 +16,7 @@ from .base import Candidate, SearchFilters
 
 
 _API_URL = "https://commons.wikimedia.org/w/api.php"
-_USER_AGENT = "OpenMontageBot/0.1 (https://github.com/calesthio/OpenMontage)"
+_USER_AGENT = "StoryMindBot/0.1 (https://github.com/calesthio/StoryMind)"
 _COMMONS_LICENSE = "Wikimedia Commons (verify per-file license)"
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
 

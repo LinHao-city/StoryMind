@@ -1,4 +1,4 @@
-"""Unsplash stock photo adapter.
+﻿"""Unsplash stock photo adapter.
 
 Unsplash is image-only in this pipeline. It widens the corpus for
 modern, polished, lifestyle, and product-adjacent scenes where a
@@ -16,7 +16,7 @@ from .base import Candidate, SearchFilters
 
 _SEARCH_URL = "https://api.unsplash.com/search/photos"
 _UNSPLASH_LICENSE = "Unsplash License (use returned hotlinked image URLs)"
-_USER_AGENT = "OpenMontageBot/0.1 (https://github.com/calesthio/OpenMontage)"
+_USER_AGENT = "StoryMindBot/0.1 (https://github.com/calesthio/StoryMind)"
 
 
 class UnsplashSource:

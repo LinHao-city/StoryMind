@@ -1,4 +1,4 @@
-"""Clip search: unified retrieval interface over a local clip corpus.
+﻿"""Clip search: unified retrieval interface over a local clip corpus.
 
 This is the tool the documentary-montage director calls at edit time.
 It loads a corpus built by `corpus_builder` and exposes every
@@ -55,7 +55,7 @@ class ClipSearch(BaseTool):
     version = "0.1.0"
     tier = ToolTier.ANALYZE
     capability = "clip_retrieval"
-    provider = "openmontage"
+    provider = "StoryMind"
     stability = ToolStability.EXPERIMENTAL
     execution_mode = ExecutionMode.SYNC
     determinism = Determinism.DETERMINISTIC

@@ -1,4 +1,4 @@
-"""Pond5 Public Domain stock source adapter.
+﻿"""Pond5 Public Domain stock source adapter.
 
 Wraps Pond5's public domain collection behind the unified `StockSource`
 protocol. Pond5 has curated ~10,000 public domain video clips plus
@@ -75,7 +75,7 @@ class Pond5PublicDomainSource:
 
         import os
         headers: dict[str, str] = {
-            "User-Agent": "OpenMontage/1.0 (stock source adapter)",
+            "User-Agent": "StoryMind/1.0 (stock source adapter)",
         }
         api_key = os.environ.get("POND5_API_KEY")
         if api_key:

@@ -1,4 +1,4 @@
-"""Character Sheet — role-based visual consistency anchor system.
+﻿"""Character Sheet — role-based visual consistency anchor system.
 
 Maintains a registry of characters with their exact visual descriptions.
 All video generation prompts that feature a character automatically
@@ -62,7 +62,7 @@ class CharacterSheet(BaseTool):
     version = "1.0.0"
     tier = ToolTier.CORE
     capability = "planning"
-    provider = "openmontage"
+    provider = "StoryMind"
     stability = ToolStability.BETA
     execution_mode = ExecutionMode.SYNC
     determinism = Determinism.DETERMINISTIC

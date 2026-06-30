@@ -1,10 +1,10 @@
-"""Prompt Enhancer — converts plain descriptions into professional cinematography prompts.
+﻿"""Prompt Enhancer — converts plain descriptions into professional cinematography prompts.
 
 Translates emotional adjectives ('epic', 'cinematic', 'dramatic') into their
 visual causes, enforces shot-type vocabulary, and appends consistency anchors.
 
 Implements the CHAI oversight loop pre/post-caption pass described in
-OpenMontage's asset-director skill.
+StoryMind's asset-director skill.
 """
 
 from __future__ import annotations
@@ -71,7 +71,7 @@ class PromptEnhancer(BaseTool):
     version = "1.0.0"
     tier = ToolTier.CORE
     capability = "planning"
-    provider = "openmontage"
+    provider = "StoryMind"
     stability = ToolStability.BETA
     execution_mode = ExecutionMode.SYNC
     determinism = Determinism.DETERMINISTIC

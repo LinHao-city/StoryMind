@@ -1,4 +1,4 @@
-"""Direct clip search: lightweight provider-agnostic stock footage acquisition.
+﻿"""Direct clip search: lightweight provider-agnostic stock footage acquisition.
 
 This tool replaces the heavy corpus_builder → clip_search pipeline when
 you already know what you want and just need clips downloaded fast. It
@@ -58,7 +58,7 @@ class DirectClipSearch(BaseTool):
     version = "0.1.0"
     tier = ToolTier.SOURCE
     capability = "clip_acquisition"
-    provider = "openmontage"
+    provider = "StoryMind"
     stability = ToolStability.BETA
     execution_mode = ExecutionMode.SYNC
     determinism = Determinism.DETERMINISTIC

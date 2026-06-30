@@ -1,4 +1,4 @@
-# Color Grading for Video Production
+﻿# Color Grading for Video Production
 
 > Sources: BBC Academy color standards, Filmmaker IQ color science series, DaVinci Resolve
 > color theory (Blackmagic documentation), WCAG 2.1 contrast guidelines, FFmpeg filter
@@ -147,7 +147,7 @@ When generating graphics, overlays, or diagrams that accompany graded video, use
 
 **Practical rule:** After color grading, any text overlays or subtitles burned into the video must still meet 4.5:1 contrast against the graded background. Test with a contrast checker on a representative frame.
 
-## Applying to OpenMontage
+## Applying to StoryMind
 
 When using the `color_grade` tool:
 

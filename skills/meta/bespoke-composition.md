@@ -1,4 +1,4 @@
-# Bespoke Composition (Atelier Mode)
+﻿# Bespoke Composition (Atelier Mode)
 
 Meta-skill for **hand-authoring a composition from scratch** instead of assembling stock
 scene-types. This is the "hand-stitched every time" path: for hero pieces, every pixel of the
@@ -14,7 +14,7 @@ need so that what you build is correct, and distinct.
 
 ## When to use this skill (authoring mode is a proposal decision)
 
-OpenMontage separates three orthogonal axes, all locked at proposal:
+StoryMind separates three orthogonal axes, all locked at proposal:
 
 - `renderer_family` — creative grammar
 - `render_runtime` — technical engine (remotion / hyperframes / ffmpeg)

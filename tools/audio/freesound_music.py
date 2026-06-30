@@ -1,4 +1,4 @@
-"""Music search and download from Freesound.org (free with API key).
+﻿"""Music search and download from Freesound.org (free with API key).
 
 Searches Freesound's extensive library of Creative Commons audio and
 downloads high-quality MP3 previews for use as background music.
@@ -191,7 +191,7 @@ class FreesoundMusic(BaseTool):
 
         request = urllib.request.Request(
             url,
-            headers={"User-Agent": "OpenMontage/0.1 (music acquisition tool)"},
+            headers={"User-Agent": "StoryMind/0.1 (music acquisition tool)"},
         )
 
         with urllib.request.urlopen(request, timeout=30) as response:
@@ -220,7 +220,7 @@ class FreesoundMusic(BaseTool):
 
         request = urllib.request.Request(
             audio_url,
-            headers={"User-Agent": "OpenMontage/0.1 (music acquisition tool)"},
+            headers={"User-Agent": "StoryMind/0.1 (music acquisition tool)"},
         )
 
         with urllib.request.urlopen(request, timeout=60) as response:

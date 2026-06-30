@@ -1,6 +1,6 @@
-"""Base tool class implementing the expanded ToolContract.
+﻿"""Base tool class implementing the expanded ToolContract.
 
-Every tool in OpenMontage inherits from BaseTool. This enforces a uniform
+Every tool in StoryMind inherits from BaseTool. This enforces a uniform
 interface for discovery, execution, cost estimation, and health reporting.
 """
 
@@ -137,7 +137,7 @@ class ToolResult:
 
 
 class BaseTool(ABC):
-    """Abstract base class for all OpenMontage tools."""
+    """Abstract base class for all StoryMind tools."""
 
     # --- Identity (override in subclasses) ---
     name: str = ""
@@ -155,7 +155,7 @@ class BaseTool(ABC):
 
     # --- Capabilities ---
     capability: str = "generic"
-    provider: str = "openmontage"
+    provider: str = "StoryMind"
     capabilities: list[str] = []
     input_schema: dict = {}
     output_schema: dict = {}

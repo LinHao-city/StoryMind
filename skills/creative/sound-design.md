@@ -1,4 +1,4 @@
-# Sound Design for Video Production
+﻿# Sound Design for Video Production
 
 > Sources: W3C accessibility standards, BBC audio guidelines, YouTube/TikTok platform specs,
 > Sweetwater mastering guides, ElevenLabs documentation, Boris FX, HookSounds, Artlist
@@ -127,7 +127,7 @@ TARGET LUFS:    -14 LUFS (YouTube/TikTok/IG) | -16 LUFS (podcasts)
 - Cut 2-4 kHz on the music bed to clear the "intelligibility band" for voice
 - Always test on phone speakers — if voice disappears, boost 2-4 kHz more aggressively
 
-## Applying to OpenMontage
+## Applying to StoryMind
 
 When the **audio_mixer** tool is used in the compose stage:
 

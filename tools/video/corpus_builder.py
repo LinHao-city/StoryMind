@@ -1,4 +1,4 @@
-"""Corpus builder: fan out across stock sources, download, thumb, embed, index.
+﻿"""Corpus builder: fan out across stock sources, download, thumb, embed, index.
 
 This is the tool the agent calls to populate a local clip corpus for
 the documentary-montage pipeline. It is deliberately the ONLY place
@@ -76,7 +76,7 @@ class CorpusBuilder(BaseTool):
     version = "0.1.0"
     tier = ToolTier.SOURCE
     capability = "corpus_population"
-    provider = "openmontage"
+    provider = "StoryMind"
     stability = ToolStability.EXPERIMENTAL
     execution_mode = ExecutionMode.SYNC
     determinism = Determinism.DETERMINISTIC
@@ -447,7 +447,7 @@ class CorpusBuilder(BaseTool):
         Raises on unexpected errors (the caller logs them).
 
         Before downloading, consults the shared clip bytes cache at
-        ``~/.openmontage/clips_cache/``: if the file is already on
+        ``~/.StoryMind/clips_cache/``: if the file is already on
         disk from a previous run (the same clip surfaced for a
         different project), the cache hard-links it straight into
         ``local_abs`` and we skip the network fetch entirely. On a

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """QA Test 05: Video composition — image + mixed audio → video, verify A/V sync.
 
 Creates a video from static images with audio and optional subtitles.
@@ -71,7 +71,7 @@ def ensure_subtitle(path):
         return
     print(f"  [fixture] Generating subtitle: {path}")
     with open(path, "w", encoding="utf-8") as f:
-        f.write("1\n00:00:00,000 --> 00:00:03,000\nWelcome to OpenMontage\n\n")
+        f.write("1\n00:00:00,000 --> 00:00:03,000\nWelcome to StoryMind\n\n")
         f.write("2\n00:00:03,000 --> 00:00:06,000\nBuilding amazing videos with AI\n\n")
         f.write("3\n00:00:06,000 --> 00:00:10,000\nLet's see what we can create\n\n")
 

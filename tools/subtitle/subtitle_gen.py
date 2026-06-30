@@ -1,4 +1,4 @@
-"""Subtitle generation tool.
+﻿"""Subtitle generation tool.
 
 Converts word-level timestamps from the transcriber into SRT, VTT,
 or caption JSON formats. Pure Python — no external dependencies beyond
@@ -28,7 +28,7 @@ class SubtitleGen(BaseTool):
     version = "0.1.0"
     tier = ToolTier.CORE
     capability = "subtitle"
-    provider = "openmontage"
+    provider = "StoryMind"
     stability = ToolStability.EXPERIMENTAL
     execution_mode = ExecutionMode.SYNC
     determinism = Determinism.DETERMINISTIC

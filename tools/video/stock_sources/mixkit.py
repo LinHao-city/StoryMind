@@ -1,4 +1,4 @@
-"""Mixkit (by Envato) stock video source adapter.
+﻿"""Mixkit (by Envato) stock video source adapter.
 
 Scrapes the Mixkit website (``mixkit.co``) for free stock video clips.
 Mixkit offers curated, high-quality footage (HD and 4K) under a free
@@ -65,7 +65,7 @@ class MixkitSource:
             r = requests.get(
                 search_url,
                 timeout=30,
-                headers={"User-Agent": "OpenMontage/1.0"},
+                headers={"User-Agent": "StoryMind/1.0"},
             )
             r.raise_for_status()
         except Exception as e:
@@ -154,7 +154,7 @@ class MixkitSource:
         try:
             r = requests.get(
                 detail_url, timeout=30,
-                headers={"User-Agent": "OpenMontage/1.0"},
+                headers={"User-Agent": "StoryMind/1.0"},
             )
             r.raise_for_status()
             soup = BeautifulSoup(r.text, "html.parser")
@@ -206,7 +206,7 @@ class MixkitSource:
 
         with requests.get(
             url, stream=True, timeout=120,
-            headers={"User-Agent": "OpenMontage/1.0"},
+            headers={"User-Agent": "StoryMind/1.0"},
         ) as r:
             r.raise_for_status()
             with open(out_path, "wb") as f:

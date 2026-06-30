@@ -1,9 +1,9 @@
-# Cinematography Director — Shot Language Reference
+﻿# Cinematography Director — Shot Language Reference
 
 ## When To Use
 
 Read this skill **before** generating any video prompt. It is the single source of
-truth for cinematography vocabulary in OpenMontage. Never describe shots with vague
+truth for cinematography vocabulary in StoryMind. Never describe shots with vague
 adjectives ("epic", "cinematic", "dramatic") without translating them into their
 visual causes first.
 

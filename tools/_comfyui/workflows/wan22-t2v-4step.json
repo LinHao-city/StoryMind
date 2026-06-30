@@ -1,4 +1,4 @@
-{
+﻿{
   "1": {
     "class_type": "CLIPLoader",
     "inputs": {
@@ -135,7 +135,7 @@
     "class_type": "SaveVideo",
     "inputs": {
       "video": ["15", 0],
-      "filename_prefix": "openmontage_t2v",
+      "filename_prefix": "StoryMind_t2v",
       "format": "auto",
       "codec": "auto"
     }

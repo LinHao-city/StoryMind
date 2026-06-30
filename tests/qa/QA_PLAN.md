@@ -1,4 +1,4 @@
-# Quality Validation Plan — Phase 3.5 + G3.11
+﻿# Quality Validation Plan — Phase 3.5 + G3.11
 
 ## Purpose
 
@@ -41,7 +41,7 @@ For each output:
 ## Run Order
 
 ```bash
-cd C:/Users/ishan/Documents/OpenMontage
+cd C:/Users/ishan/Documents/StoryMind
 
 # Phase 1: Individual tools (can run in parallel)
 python tests/qa/test_01_tts.py

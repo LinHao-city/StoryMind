@@ -1,4 +1,4 @@
-"""Tool registry with status, stability, and support-envelope reporting.
+﻿"""Tool registry with status, stability, and support-envelope reporting.
 
 The registry discovers all registered tools, reports their availability,
 and lets the orchestrator/agents query capabilities by tier, status, etc.
@@ -53,7 +53,7 @@ def _scrub_unicode_dashes(value: Any) -> Any:
 
 
 class ToolRegistry:
-    """Central registry of all OpenMontage tools."""
+    """Central registry of all StoryMind tools."""
 
     def __init__(self) -> None:
         self._tools: dict[str, BaseTool] = {}
