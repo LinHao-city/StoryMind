@@ -1,12 +1,15 @@
 ﻿<p align="center">
-  <img src="assets/logo.png" alt="StoryMind 分镜导影" width="200">
+  <img src="assets/logo.png" alt="StoryMind" width="200">
 </p>
 
-<h1 align="center">StoryMind 分镜导影</h1>
+<h1 align="center">StoryMind</h1>
 
-<p align="center"><strong>Agentic AI video production with cinematography-aware storyboard planning and cross-shot consistency.</strong></p>
+<p align="center"><strong>AI Storyboard Director — From Story to Screen</strong></p>
 
-<p align="center"><em>AI 驱动的专业分镜规划 · 角色跨镜头一致性 · 全链路影像生产系统</em></p>
+<p align="center">
+  Agentic video production with LLM-powered shot planning, cinematography-aware prompts,
+  and cross-shot character consistency.
+</p>
 
 <p align="center">
   <a href="#start-from-a-video-you-already-love">Paste A Video</a> &nbsp;·&nbsp;
