@@ -50,6 +50,8 @@ Most AI video tools take a prompt and return a clip. StoryMind works the way a r
 
 **The core idea:** before generating a single frame, StoryMind runs an LLM-powered **Storyboard Director** that breaks your script into a structured shot-by-shot plan. Each shot gets a specific scale (close-up, wide, aerial), a camera movement (dolly-in, crane, handheld), a lighting design, and exact character descriptions that carry through every scene. Only then does video generation begin — with prompts that actually communicate cinematography.
 
+StoryMind is also a **complete end-to-end production system**. It can make a real *video video* — not just Ken Burns over stills. The agent builds a corpus from free stock footage and open archives, retrieves actual motion clips, cuts them into a timeline, and renders a finished piece. Or it generates every frame from scratch with AI video models. Or it edits your own talking-head footage. All from a plain-language prompt.
+
 ```
 Your prompt: "A scientist decodes an alien farewell signal from 3 million years ago"
      ↓
@@ -72,25 +74,21 @@ Final 30-second film
 
 ## Key Features
 
-### Storyboard Planning (What Makes StoryMind Different)
+### Our Core Innovation — Storyboard Planning
 
-- **LLM Shot Decomposition** — `StoryboardPlanner` uses Claude to turn a treatment into a structured JSON shot plan with shot scale, camera movement, lighting, and emotional beat for every scene
-- **Character Consistency** — `CharacterSheet` locks character descriptions and injects them verbatim into every shot prompt that features that character
+- **LLM Shot Decomposition** — `StoryboardPlanner` uses Claude to turn a treatment into a structured JSON shot plan: shot scale, camera movement, lighting, emotional beat, and character anchors per shot
+- **Character Consistency** — `CharacterSheet` locks each character's visual description and injects it verbatim into every shot prompt featuring that character — no drift across clips
 - **Cross-Shot Visual Anchors** — `SceneConsistencyTracker` registers the color grade and lighting style from Shot 1 and propagates them across all subsequent shots
-- **Prompt Enhancement** — `PromptEnhancer` translates vague adjectives ("epic", "dramatic") into specific visual instructions (low-angle, dolly-in, deep shadows)
+- **Professional Prompt Engine** — `PromptEnhancer` translates vague adjectives ("epic", "dramatic") into specific cinematography instructions (low-angle, slow dolly-in, deep shadows)
 
-### Video Production Pipeline
+### Production Capabilities
 
-- **Multi-provider video generation** — Doubao Seedance 2.0, Kling, Runway, Veo, local GPU models
-- **Free stock footage** — Pexels, Pixabay, Unsplash (free API keys)
-- **TTS narration** — Mimo TTS (free via Leihuo), Piper (fully offline), ElevenLabs, OpenAI
-- **Music** — Pixabay free music search, Suno AI, ElevenLabs
-- **Composition** — Remotion (React-based) or FFmpeg
-- **Budget control** — cost estimate before any generation, configurable spend caps
-
-### Platform Support
-
-Works with any AI coding assistant: **Claude Code, Cursor, Copilot, Windsurf, Codex**
+- **12 complete pipelines** — cinematic trailers, animated explainers, documentary montages, talking heads, screen demos, character animation, podcast repurposing, dubbing, and more
+- **55+ production tools** — video generation, image creation, TTS, music, audio mixing, subtitles, color grading, face enhancement, scene detection, and analysis
+- **Real-footage documentary** — builds a semantically-indexed corpus from free stock sources (Pexels, Pixabay, Unsplash) and cuts actual motion footage into a finished timeline
+- **Web research built in** — before writing a word, the agent runs 15+ searches across news, academic sources, and video platforms to ground every video in real, current data
+- **No vendor lock-in** — every capability has multiple provider options; a 7-dimension scoring engine picks the best match automatically
+- **Budget governance** — cost estimate before execution, configurable spend caps, per-action approval thresholds
 
 ---
 
