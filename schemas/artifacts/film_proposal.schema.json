@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "StoryMind/artifacts/film_proposal",
+  "type": "object",
+  "required": ["version", "story_fingerprint", "renderer_family", "render_runtime", "composition_mode", "options_considered", "approved_by", "approved_at", "budget_usd"],
+  "properties": {
+    "version": {"const": "1.0"},
+    "story_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "renderer_family": {"const": "cinematic-trailer"},
+    "render_runtime": {"enum": ["ffmpeg", "remotion", "hyperframes"]},
+    "composition_mode": {"enum": ["templated", "atelier"]},
+    "options_considered": {"type": "array", "minItems": 2, "uniqueItems": true,
+      "items": {"enum": ["ffmpeg", "remotion", "hyperframes"]}},
+    "approved_by": {"const": "user"},
+    "approved_at": {"type": "string", "format": "date-time"},
+    "budget_usd": {"type": "number", "exclusiveMinimum": 0},
+    "provider_policy": {"type": "object"}
+  }, "additionalProperties": false
+}

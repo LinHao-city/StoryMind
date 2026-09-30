@@ -268,7 +268,7 @@ class ComfyUIClient:
     @staticmethod
     def load_workflow(path: Path) -> dict:
         """Load a workflow JSON template from disk."""
-        with open(path) as f:
+        with open(path, encoding="utf-8-sig") as f:
             return json.load(f)
 
     @staticmethod

@@ -88,7 +88,7 @@ class CheckpointValidationError(ValueError):
 
 @lru_cache(maxsize=1)
 def _load_checkpoint_schema() -> dict[str, Any]:
-    with open(CHECKPOINT_SCHEMA_PATH) as f:
+    with open(CHECKPOINT_SCHEMA_PATH, encoding="utf-8-sig") as f:
         return json.load(f)
 
 
@@ -96,13 +96,27 @@ def _validate_artifacts_for_stage(
     stage: str,
     status: str,
     artifacts: dict[str, Any],
+    pipeline_type: str | None = None,
 ) -> None:
-    required_artifact = CANONICAL_STAGE_ARTIFACTS[stage]
+    required_artifact = CANONICAL_STAGE_ARTIFACTS.get(stage)
+    if pipeline_type and pipeline_type != "unknown":
+        from lib.pipeline_loader import load_pipeline
+        manifest = load_pipeline(pipeline_type)
+        definition = next((item for item in manifest["stages"] if item["name"] == stage), None)
+        if definition:
+            produced = definition.get("produces", [])
+            required_artifact = produced[0] if produced else None
+    if required_artifact is None:
+        raise CheckpointValidationError(f"Stage {stage!r} has no canonical artifact")
     if status in {"completed", "awaiting_human"} and required_artifact not in artifacts:
         raise CheckpointValidationError(
             f"Stage {stage!r} with status {status!r} must include "
             f"canonical artifact {required_artifact!r}"
         )
+    if (pipeline_type == "character-film" and stage == "edit"
+            and status in {"completed", "awaiting_human"}
+            and "asset_manifest" not in artifacts):
+        raise CheckpointValidationError("Film edit requires asset_manifest alongside edit_decisions")
 
     for artifact_name, artifact_data in artifacts.items():
         if artifact_name not in ARTIFACT_NAMES:
@@ -145,7 +159,19 @@ def validate_checkpoint(checkpoint: dict[str, Any]) -> None:
     if not isinstance(artifacts, dict):
         raise CheckpointValidationError("Checkpoint artifacts must be a dictionary")
 
-    _validate_artifacts_for_stage(stage, status, artifacts)
+    _validate_artifacts_for_stage(stage, status, artifacts, pipeline_type)
+
+    if pipeline_type == "character-film" and status in {"completed", "awaiting_human"}:
+        from lib.character_film_state import FilmStateError, validate_locked_story
+        if stage == "story_development":
+            story = artifacts["story_bible"]
+            if status == "completed":
+                try:
+                    validate_locked_story(story)
+                except FilmStateError as exc:
+                    raise CheckpointValidationError(str(exc)) from exc
+            elif story["status"] != "AWAITING_APPROVAL":
+                raise CheckpointValidationError("Story awaiting approval must have AWAITING_APPROVAL status")
 
     try:
         jsonschema.validate(instance=checkpoint, schema=_load_checkpoint_schema())
@@ -155,6 +181,122 @@ def validate_checkpoint(checkpoint: dict[str, Any]) -> None:
 
 def _checkpoint_path(pipeline_dir: Path, project_id: str, stage: str) -> Path:
     return pipeline_dir / project_id / f"checkpoint_{stage}.json"
+
+
+def _character_film_inputs(
+    pipeline_dir: Path, project_id: str, stage: str,
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Read the latest completed upstream artifacts and their fingerprints."""
+    from lib.character_film_state import artifact_fingerprint
+    from lib.pipeline_loader import load_pipeline
+
+    manifest = load_pipeline("character-film")
+    definition = next(item for item in manifest["stages"] if item["name"] == stage)
+    needed = definition.get("required_artifacts_in", [])
+    prior = []
+    for item in manifest["stages"]:
+        if item["name"] == stage:
+            break
+        prior.append(item["name"])
+    current = get_completed_stages(pipeline_dir, project_id, "character-film")
+    if current[:len(prior)] != prior:
+        raise CheckpointValidationError(
+            f"Stage {stage!r} requires current completed stages {prior}; found {current}"
+        )
+    artifacts: dict[str, Any] = {}
+    for prior_stage in reversed(prior):
+        cp = read_checkpoint(pipeline_dir, project_id, prior_stage)
+        if cp is None or cp["status"] != "completed" or cp.get("pipeline_type") != "character-film":
+            continue
+        for name in needed:
+            if name not in artifacts and name in cp["artifacts"]:
+                artifacts[name] = cp["artifacts"][name]
+    missing = set(needed) - set(artifacts)
+    if missing:
+        raise CheckpointValidationError(f"Missing completed upstream artifacts: {sorted(missing)}")
+    return artifacts, {name: artifact_fingerprint(value) for name, value in artifacts.items()}
+
+
+def _validate_character_film_transition(
+    pipeline_dir: Path, project_id: str, stage: str, status: str,
+    artifacts: dict[str, Any], metadata: dict[str, Any],
+) -> None:
+    if stage == "story_development" or status not in {"completed", "awaiting_human"}:
+        return
+    from lib.character_film_state import FilmStateError, validate_candidate_selections, validate_character_bible
+    upstream, fingerprints = _character_film_inputs(pipeline_dir, project_id, stage)
+    metadata["input_fingerprints"] = fingerprints
+    bible = artifacts.get("character_bible")
+    if bible is not None:
+        try:
+            validate_character_bible(
+                bible, upstream["story_bible"],
+                pipeline_dir.parent / "projects" / project_id,
+                require_locked=(stage == "character_lock" and status == "completed"),
+            )
+        except FilmStateError as exc:
+            raise CheckpointValidationError(str(exc)) from exc
+    if stage == "character_distillation":
+        try:
+            validate_candidate_selections(
+                artifacts["character_candidates"], upstream["story_bible"],
+                upstream["character_bible"], pipeline_dir.parent / "projects" / project_id,
+            )
+        except FilmStateError as exc:
+            raise CheckpointValidationError(str(exc)) from exc
+    if stage == "character_lock" and status == "completed":
+        selected = {entry["character_id"]: entry["selected_candidate_id"]
+                    for entry in upstream["character_candidates"]["selections"]}
+        if any(character.get("selected_candidate_id") != selected.get(character["id"])
+               for character in bible["characters"]):
+            raise CheckpointValidationError("Locked characters must identify their approved candidate")
+    if stage in {"shot_planning", "keyframe_generation"}:
+        from lib.film_continuity import validate_keyframes, validate_shot_plan
+        try:
+            project_dir = pipeline_dir.parent / "projects" / project_id
+            if stage == "shot_planning":
+                validate_shot_plan(
+                    artifacts["film_shot_plan"], upstream["story_bible"],
+                    upstream["character_bible"], project_dir,
+                )
+            else:
+                validate_keyframes(
+                    artifacts["film_keyframes"], upstream["film_shot_plan"], project_dir,
+                )
+        except FilmStateError as exc:
+            raise CheckpointValidationError(str(exc)) from exc
+    if stage == "video_generation":
+        from lib.film_continuity import validate_clips
+        try:
+            validate_clips(
+                artifacts["film_clips"], upstream["film_shot_plan"],
+                upstream["film_keyframes"], pipeline_dir.parent / "projects" / project_id,
+            )
+        except FilmStateError as exc:
+            raise CheckpointValidationError(str(exc)) from exc
+    if stage in {"proposal", "edit", "compose", "final_review"}:
+        from lib.film_delivery import (
+            validate_film_edit, validate_film_final_review,
+            validate_film_proposal, validate_film_render,
+        )
+        try:
+            project_dir = pipeline_dir.parent / "projects" / project_id
+            if stage == "proposal":
+                validate_film_proposal(artifacts["film_proposal"], upstream["story_bible"])
+            elif stage == "edit":
+                validate_film_edit(
+                    artifacts["edit_decisions"], artifacts["asset_manifest"],
+                    upstream["film_clips"], upstream["film_proposal"], project_dir,
+                )
+            elif stage == "compose":
+                validate_film_render(artifacts["render_report"], upstream["film_proposal"], project_dir)
+            else:
+                validate_film_final_review(
+                    artifacts["final_review"], upstream["render_report"],
+                    upstream["film_proposal"], project_dir,
+                )
+        except FilmStateError as exc:
+            raise CheckpointValidationError(str(exc)) from exc
 
 
 def _decision_log_path(pipeline_dir: Path, project_id: str) -> Path:
@@ -239,8 +381,16 @@ def write_checkpoint(
         checkpoint["cost_snapshot"] = cost_snapshot
     if error is not None:
         checkpoint["error"] = error
-    if metadata is not None:
-        checkpoint["metadata"] = metadata
+    checkpoint_metadata = dict(metadata or {})
+    if pipeline_type == "character-film":
+        # Validate the stage's own artifact contract before transition checks
+        # dereference it. Missing output must surface as a checkpoint error.
+        _validate_artifacts_for_stage(stage, status, artifacts, pipeline_type)
+        _validate_character_film_transition(
+            pipeline_dir, project_id, stage, status, artifacts, checkpoint_metadata,
+        )
+    if checkpoint_metadata:
+        checkpoint["metadata"] = checkpoint_metadata
 
     # Merge decision_log: if this checkpoint carries new decisions,
     # append them to the project-level decision log file, then write the
@@ -318,6 +468,85 @@ def get_completed_stages(
     """
     stages_to_check = get_pipeline_stages(pipeline_type)
     completed = []
+    if pipeline_type == "character-film":
+        from lib.character_film_state import FilmStateError, validate_candidate_selections, validate_character_bible, validate_locked_story
+        from lib.pipeline_loader import load_pipeline
+        manifest = load_pipeline(pipeline_type)
+        latest: dict[str, Any] = {}
+        for definition in manifest["stages"]:
+            stage = definition["name"]
+            cp = read_checkpoint(pipeline_dir, project_id, stage)
+            if cp is None or cp.get("pipeline_type") != pipeline_type or cp.get("status") != "completed":
+                break
+            expected = cp.get("metadata", {}).get("input_fingerprints", {})
+            required = definition.get("required_artifacts_in", [])
+            if required:
+                from lib.character_film_state import artifact_fingerprint
+                if any(name not in latest or expected.get(name) != artifact_fingerprint(latest[name]) for name in required):
+                    break
+            try:
+                if stage == "story_development":
+                    validate_locked_story(cp["artifacts"]["story_bible"])
+                elif stage == "character_distillation":
+                    validate_candidate_selections(
+                        cp["artifacts"]["character_candidates"], latest["story_bible"],
+                        latest["character_bible"], pipeline_dir.parent / "projects" / project_id,
+                    )
+                elif stage == "shot_planning":
+                    from lib.film_continuity import validate_shot_plan
+                    validate_shot_plan(
+                        cp["artifacts"]["film_shot_plan"], latest["story_bible"],
+                        latest["character_bible"], pipeline_dir.parent / "projects" / project_id,
+                    )
+                elif stage == "keyframe_generation":
+                    from lib.film_continuity import validate_keyframes
+                    validate_keyframes(
+                        cp["artifacts"]["film_keyframes"], latest["film_shot_plan"],
+                        pipeline_dir.parent / "projects" / project_id,
+                    )
+                elif stage == "video_generation":
+                    from lib.film_continuity import validate_clips
+                    validate_clips(
+                        cp["artifacts"]["film_clips"], latest["film_shot_plan"],
+                        latest["film_keyframes"], pipeline_dir.parent / "projects" / project_id,
+                    )
+                elif stage in {"proposal", "edit", "compose", "final_review"}:
+                    from lib.film_delivery import (
+                        validate_film_edit, validate_film_final_review,
+                        validate_film_proposal, validate_film_render,
+                    )
+                    project_dir = pipeline_dir.parent / "projects" / project_id
+                    if stage == "proposal":
+                        validate_film_proposal(cp["artifacts"]["film_proposal"], latest["story_bible"])
+                    elif stage == "edit":
+                        validate_film_edit(
+                            cp["artifacts"]["edit_decisions"], cp["artifacts"]["asset_manifest"],
+                            latest["film_clips"], latest["film_proposal"], project_dir,
+                        )
+                    elif stage == "compose":
+                        validate_film_render(cp["artifacts"]["render_report"], latest["film_proposal"], project_dir)
+                    else:
+                        validate_film_final_review(
+                            cp["artifacts"]["final_review"], latest["render_report"],
+                            latest["film_proposal"], project_dir,
+                        )
+                elif "character_bible" in cp["artifacts"]:
+                    validate_character_bible(
+                        cp["artifacts"]["character_bible"], latest["story_bible"],
+                        pipeline_dir.parent / "projects" / project_id,
+                        require_locked=(stage == "character_lock"),
+                    )
+                    if stage == "character_lock":
+                        selected = {entry["character_id"]: entry["selected_candidate_id"]
+                                    for entry in latest["character_candidates"]["selections"]}
+                        if any(character.get("selected_candidate_id") != selected.get(character["id"])
+                               for character in cp["artifacts"]["character_bible"]["characters"]):
+                            break
+            except FilmStateError:
+                break
+            latest.update(cp["artifacts"])
+            completed.append(stage)
+        return completed
     for stage in stages_to_check:
         cp = read_checkpoint(pipeline_dir, project_id, stage)
         if cp and cp.get("status") == "completed":

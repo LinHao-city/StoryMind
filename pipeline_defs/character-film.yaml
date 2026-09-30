@@ -1,0 +1,171 @@
+name: character-film
+version: "0.6"
+description: >
+  Character-first fictional film pipeline. Story and character approvals lead
+  to a derived reference pack, reviewed keyframes and clips, and a final movie.
+  Real character consistency must be verified through staged experiments.
+category: cinematic
+stability: beta
+default_checkpoint_policy: guided
+orchestration:
+  mode: executive-producer
+  skill: pipelines/character-film/executive-producer
+  budget_default_usd: 10.0
+  max_revisions_per_stage: 3
+required_skills:
+  - pipelines/character-film/executive-producer
+  - pipelines/character-film/story-development-director
+  - pipelines/character-film/character-discovery-director
+  - pipelines/character-film/character-distillation-director
+  - pipelines/character-film/character-lock-director
+  - pipelines/character-film/proposal-director
+  - pipelines/character-film/shot-planning-director
+  - pipelines/character-film/keyframe-generation-director
+  - pipelines/character-film/video-generation-director
+  - pipelines/character-film/edit-director
+  - pipelines/character-film/compose-director
+  - pipelines/character-film/final-review-director
+  - meta/reviewer
+  - meta/checkpoint-protocol
+stages:
+  - name: story_development
+    skill: pipelines/character-film/story-development-director
+    produces: [story_bible]
+    tools_available: []
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Story has a coherent beginning, escalation, climax, and resolution
+      - Character and location requirements fit the requested runtime
+      - User approval is explicit before LOCKED status
+    success_criteria:
+      - Schema-valid story_bible with explicit user approval and LOCKED status
+  - name: character_discovery
+    skill: pipelines/character-film/character-discovery-director
+    required_artifacts_in: [story_bible]
+    produces: [character_bible]
+    tools_available: [character_manager, character_media]
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Every story character has a distinct record
+      - Required outfits and source privacy are identified
+      - Private family photos default to local-only with no downstream original-photo use
+    success_criteria:
+      - Schema-valid character_bible tied to the locked story fingerprint
+  - name: character_distillation
+    skill: pipelines/character-film/character-distillation-director
+    required_artifacts_in: [story_bible, character_bible]
+    produces: [character_candidates]
+    tools_available: [character_media]
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Source photo permissions are explicit before remote image generation
+      - Each candidate preserves important traits without age misrepresentation
+      - Generated candidate files and model provenance are registered locally
+      - The user selects one candidate per character
+    success_criteria:
+      - Character candidate selections are schema-valid and user-approved
+  - name: character_lock
+    skill: pipelines/character-film/character-lock-director
+    required_artifacts_in: [story_bible, character_bible, character_candidates]
+    produces: [character_bible]
+    tools_available: [character_manager, character_media]
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Every principal character has explicit user approval
+      - Master identity, full-body reference, and required outfits exist
+      - Source-photo restrictions are preserved
+    success_criteria:
+      - Every character passes CharacterManager lock validation
+  - name: proposal
+    skill: pipelines/character-film/proposal-director
+    required_artifacts_in: [story_bible, character_bible]
+    produces: [film_proposal]
+    tools_available: [video_compose, film_provider_router]
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Both available composition runtimes are presented
+      - Video provider, public output exposure, and budget are explicitly approved
+    success_criteria:
+      - Film proposal records a user-approved render runtime and budget
+  - name: shot_planning
+    skill: pipelines/character-film/shot-planning-director
+    required_artifacts_in: [story_bible, character_bible, film_proposal]
+    produces: [film_shot_plan]
+    tools_available: [storyboard_planner, scene_consistency_tracker]
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Shots cover the approved story and target duration
+      - Every character uses a locked outfit and valid state transition
+      - Character identities are named in every relevant prompt
+    success_criteria:
+      - Film shot plan passes schema and continuity checks
+  - name: keyframe_generation
+    skill: pipelines/character-film/keyframe-generation-director
+    required_artifacts_in: [film_shot_plan, character_bible]
+    produces: [film_keyframes]
+    tools_available: [character_media, visual_qa]
+    checkpoint_required: true
+    human_approval_default: false
+    review_focus:
+      - One approved keyframe exists per shot
+      - Continuity supervisor compares identity and outfit to locked references
+      - Creative director approves scene composition and narrative intent
+    success_criteria:
+      - Every keyframe has continuity and creative PASS before video generation
+  - name: video_generation
+    skill: pipelines/character-film/video-generation-director
+    required_artifacts_in: [story_bible, character_bible, film_proposal, film_shot_plan, film_keyframes]
+    produces: [film_clips]
+    tools_available: [film_provider_router, visual_qa, face_tracker]
+    checkpoint_required: true
+    human_approval_default: false
+    review_focus:
+      - Only approved derived references reach the named provider
+      - Every clip passes technical probe and frame sampling
+      - Continuity Supervisor and Creative Director independently approve each clip
+      - Policy rejections are not retried as quality failures
+    success_criteria:
+      - One technically valid, continuity-approved clip per shot
+  - name: edit
+    skill: pipelines/character-film/edit-director
+    required_artifacts_in: [film_proposal, film_shot_plan, film_clips]
+    produces: [edit_decisions, asset_manifest]
+    tools_available: []
+    checkpoint_required: true
+    human_approval_default: false
+    review_focus:
+      - Every approved clip appears once and in story order
+      - Cuts fit clip durations and preserve the approved render runtime
+    success_criteria:
+      - Schema-valid edit decisions and asset manifest reference approved clips
+  - name: compose
+    skill: pipelines/character-film/compose-director
+    required_artifacts_in: [film_proposal, edit_decisions, asset_manifest]
+    produces: [render_report]
+    tools_available: [video_compose, visual_qa]
+    checkpoint_required: true
+    human_approval_default: false
+    review_focus:
+      - Selected runtime matches the approved proposal
+      - Final MP4 exists and passes technical probe
+    success_criteria:
+      - Schema-valid render report points to a playable project-local movie
+  - name: final_review
+    skill: pipelines/character-film/final-review-director
+    required_artifacts_in: [render_report, film_clips, film_proposal]
+    produces: [final_review]
+    tools_available: [visual_qa, face_tracker]
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Final film preserves character identity and wardrobe across all cuts
+      - Technical, visual, and audio checks are complete
+      - No unapproved runtime or provider substitution occurred
+    success_criteria:
+      - Final review passes and the movie is ready for user delivery

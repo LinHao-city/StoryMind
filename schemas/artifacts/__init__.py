@@ -16,6 +16,13 @@ ARTIFACT_NAMES = [
     "brief",
     "script",
     "character_design",
+    "character_bible",
+    "character_candidates",
+    "film_shot_plan",
+    "film_keyframes",
+    "film_clips",
+    "film_proposal",
+    "story_bible",
     "rig_plan",
     "pose_library",
     "scene_plan",
@@ -39,7 +46,7 @@ def load_schema(name: str) -> dict:
     path = SCHEMA_DIR / f"{name}.schema.json"
     if not path.exists():
         raise FileNotFoundError(f"Schema not found: {path}")
-    with open(path) as f:
+    with open(path, encoding="utf-8-sig") as f:
         return json.load(f)
 
 

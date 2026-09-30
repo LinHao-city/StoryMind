@@ -447,7 +447,7 @@ def test_schemas_require_render_runtime():
 
     ed = json.loads(
         (root / "schemas" / "artifacts" / "edit_decisions.schema.json").read_text(
-            encoding="utf-8"
+            encoding="utf-8-sig"
         )
     )
     assert "render_runtime" in ed["required"], (
@@ -457,7 +457,7 @@ def test_schemas_require_render_runtime():
 
     pp = json.loads(
         (root / "schemas" / "artifacts" / "proposal_packet.schema.json").read_text(
-            encoding="utf-8"
+            encoding="utf-8-sig"
         )
     )
     pp_prod = pp["properties"]["production_plan"]
@@ -597,7 +597,7 @@ def test_decision_log_accepts_render_runtime_selection_with_both_options():
     root = Path(__file__).resolve().parent.parent.parent
     schema = json.loads(
         (root / "schemas" / "artifacts" / "decision_log.schema.json").read_text(
-            encoding="utf-8"
+            encoding="utf-8-sig"
         )
     )
 
@@ -1055,7 +1055,7 @@ def test_proposal_packet_schema_accepts_render_runtime():
         / "artifacts"
         / "proposal_packet.schema.json"
     )
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema = json.loads(schema_path.read_text(encoding="utf-8-sig"))
     props = schema["properties"]["production_plan"]["properties"]
     assert "render_runtime" in props
     assert "renderer_family" in props
@@ -1067,7 +1067,7 @@ def test_schemas_accept_voice_performance_contract():
 
     script_schema = json.loads(
         (root / "schemas" / "artifacts" / "script.schema.json").read_text(
-            encoding="utf-8"
+            encoding="utf-8-sig"
         )
     )
     assert "voice_performance" in script_schema["properties"]
@@ -1077,7 +1077,7 @@ def test_schemas_accept_voice_performance_contract():
 
     proposal_schema = json.loads(
         (root / "schemas" / "artifacts" / "proposal_packet.schema.json").read_text(
-            encoding="utf-8"
+            encoding="utf-8-sig"
         )
     )
     voice_selection = proposal_schema["properties"]["production_plan"]["properties"][
@@ -1089,7 +1089,7 @@ def test_schemas_accept_voice_performance_contract():
 
     asset_schema = json.loads(
         (root / "schemas" / "artifacts" / "asset_manifest.schema.json").read_text(
-            encoding="utf-8"
+            encoding="utf-8-sig"
         )
     )
     asset_props = asset_schema["properties"]["assets"]["items"]["properties"]
@@ -1132,7 +1132,7 @@ def test_edit_decisions_schema_accepts_render_runtime():
         / "artifacts"
         / "edit_decisions.schema.json"
     )
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema = json.loads(schema_path.read_text(encoding="utf-8-sig"))
     assert "render_runtime" in schema["properties"]
     assert schema["properties"]["render_runtime"]["enum"] == [
         "remotion",
@@ -1148,7 +1148,7 @@ def test_final_review_tracks_runtime_and_swap():
         / "artifacts"
         / "final_review.schema.json"
     )
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema = json.loads(schema_path.read_text(encoding="utf-8-sig"))
     pp = schema["properties"]["checks"]["properties"]["promise_preservation"][
         "properties"
     ]
@@ -1163,7 +1163,7 @@ def test_decision_log_has_render_runtime_category():
         / "artifacts"
         / "decision_log.schema.json"
     )
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema = json.loads(schema_path.read_text(encoding="utf-8-sig"))
     category_enum = schema["properties"]["decisions"]["items"]["properties"][
         "category"
     ]["enum"]

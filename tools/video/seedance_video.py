@@ -27,7 +27,7 @@ from tools.base_tool import (
 
 class SeedanceVideo(BaseTool):
     name = "seedance_video"
-    version = "0.2.0"
+    version = "0.3.0"
     tier = ToolTier.GENERATE
     capability = "video_generation"
     provider = "seedance"
@@ -59,7 +59,7 @@ class SeedanceVideo(BaseTool):
         "seed": True,
     }
     best_for = [
-        "preferred premium video gen when FAL_KEY is available",
+        "reference-conditioned cinematic clips when approved for the project",
         "cinematic trailers, teasers, and high-fidelity clips with native synchronized audio",
         "director-level camera control and multi-shot editing in a single generation",
         "lip-sync from quoted dialogue in prompts",
@@ -171,12 +171,36 @@ class SeedanceVideo(BaseTool):
         variant = inputs.get("model_variant", "standard")
         duration = inputs.get("duration", "5")
         secs = 5 if duration == "auto" else int(duration)
-        rate = 0.2419 if variant == "fast" else 0.3034
+        rate = 0.2419 if variant == "fast" else 0.3024
         return round(rate * secs, 2)
 
     def estimate_runtime(self, inputs: dict[str, Any]) -> float:
         variant = inputs.get("model_variant", "standard")
         return 60.0 if variant == "fast" else 120.0
+
+    @staticmethod
+    def build_reference_payload(inputs: dict[str, Any]) -> dict[str, Any]:
+        """Map StoryMind reference fields to Seedance 2.0 API keys."""
+        ref_image_urls = list(inputs.get("reference_image_urls") or [])
+        for local_path in inputs.get("reference_image_paths") or []:
+            from tools.video._shared import upload_image_fal
+            ref_image_urls.append(upload_image_fal(local_path))
+        ref_video_urls = list(inputs.get("reference_video_urls") or [])
+        ref_audio_urls = list(inputs.get("reference_audio_urls") or [])
+        for label, values, limit in (
+            ("images", ref_image_urls, 9), ("videos", ref_video_urls, 3),
+            ("audio clips", ref_audio_urls, 3),
+        ):
+            if len(values) > limit:
+                raise ValueError(
+                    f"Seedance 2.0 reference_to_video accepts at most {limit} reference {label}; got {len(values)}"
+                )
+        return {
+            key: values for key, values in (
+                ("image_urls", ref_image_urls), ("video_urls", ref_video_urls),
+                ("audio_urls", ref_audio_urls),
+            ) if values
+        }
 
     def execute(self, inputs: dict[str, Any]) -> ToolResult:
         api_key = self._get_api_key()
@@ -221,34 +245,10 @@ class SeedanceVideo(BaseTool):
                 payload["end_image_url"] = inputs["end_image_url"]
 
         if operation == "reference_to_video":
-            ref_image_urls = list(inputs.get("reference_image_urls") or [])
-            for local_path in inputs.get("reference_image_paths") or []:
-                from tools.video._shared import upload_image_fal
-                ref_image_urls.append(upload_image_fal(local_path))
-            # Seedance 2.0 reference-to-video ceilings: 9 images + 3 video + 3 audio.
-            if len(ref_image_urls) > 9:
-                return ToolResult(
-                    success=False,
-                    error=f"Seedance 2.0 reference_to_video accepts at most 9 reference images; got {len(ref_image_urls)}",
-                )
-            ref_video_urls = list(inputs.get("reference_video_urls") or [])
-            if len(ref_video_urls) > 3:
-                return ToolResult(
-                    success=False,
-                    error=f"Seedance 2.0 reference_to_video accepts at most 3 reference videos; got {len(ref_video_urls)}",
-                )
-            ref_audio_urls = list(inputs.get("reference_audio_urls") or [])
-            if len(ref_audio_urls) > 3:
-                return ToolResult(
-                    success=False,
-                    error=f"Seedance 2.0 reference_to_video accepts at most 3 reference audio clips; got {len(ref_audio_urls)}",
-                )
-            if ref_image_urls:
-                payload["reference_image_urls"] = ref_image_urls
-            if ref_video_urls:
-                payload["reference_video_urls"] = ref_video_urls
-            if ref_audio_urls:
-                payload["reference_audio_urls"] = ref_audio_urls
+            try:
+                payload.update(self.build_reference_payload(inputs))
+            except ValueError as exc:
+                return ToolResult(success=False, error=str(exc))
 
         headers = {
             "Authorization": f"Key {api_key}",
@@ -267,7 +267,8 @@ class SeedanceVideo(BaseTool):
             status_url = queue_data["status_url"]
             response_url = queue_data["response_url"]
 
-            while True:
+            deadline = time.monotonic() + 900
+            while time.monotonic() < deadline:
                 time.sleep(5)
                 status_resp = requests.get(status_url, headers=headers, timeout=15)
                 status_resp.raise_for_status()
@@ -279,6 +280,8 @@ class SeedanceVideo(BaseTool):
                         success=False,
                         error=f"Seedance 2.0 video generation {status.lower()}",
                     )
+            else:
+                return ToolResult(success=False, error="Seedance 2.0 queue timed out after 15 minutes")
 
             result_resp = requests.get(response_url, headers=headers, timeout=30)
             result_resp.raise_for_status()
@@ -292,6 +295,26 @@ class SeedanceVideo(BaseTool):
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_bytes(video_response.content)
 
+        except requests.HTTPError as e:
+            response = e.response
+            if response is not None:
+                try:
+                    details = response.json().get("detail", [])
+                except ValueError:
+                    details = []
+                if isinstance(details, list):
+                    for detail in details:
+                        if (isinstance(detail, dict)
+                                and detail.get("type") == "content_policy_violation"):
+                            return ToolResult(
+                                success=False,
+                                error="Seedance 2.0 content policy rejected the supplied media: "
+                                + str(detail.get("msg", "content policy violation")),
+                            )
+            return ToolResult(
+                success=False,
+                error=f"Seedance 2.0 video generation failed: {e}",
+            )
         except Exception as e:
             return ToolResult(
                 success=False,

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "StoryMind/artifacts/film_keyframes",
+  "type": "object",
+  "required": ["version", "shot_plan_fingerprint", "frames"],
+  "properties": {
+    "version": {"const": "1.0"},
+    "shot_plan_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "frames": {"type": "array", "minItems": 1, "items": {
+      "type": "object", "required": ["shot_id", "path", "sha256", "provider", "model", "prompt", "continuity_review", "creative_review"],
+      "properties": {
+        "shot_id": {"type": "string"}, "path": {"type": "string"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "provider": {"type": "string"}, "model": {"type": "string"},
+        "prompt": {"type": "string"}, "seed": {"type": ["integer", "null"]},
+        "continuity_review": {"$ref": "#/$defs/review"},
+        "creative_review": {"$ref": "#/$defs/review"}
+      }, "additionalProperties": false}
+    }
+  },
+  "$defs": {"review": {"type": "object", "required": ["verdict", "reviewer", "notes"],
+    "properties": {"verdict": {"enum": ["pass", "fail", "needs_human"]},
+      "reviewer": {"type": "string"}, "notes": {"type": "string"}},
+    "additionalProperties": false}},
+  "additionalProperties": false
+}

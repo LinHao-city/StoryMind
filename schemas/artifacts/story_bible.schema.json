@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "StoryMind/artifacts/story_bible",
+  "title": "Character Film Story Bible",
+  "type": "object",
+  "required": ["version", "revision", "title", "premise", "synopsis", "narrative", "genre", "tone", "target_duration_seconds", "characters", "locations", "scenes", "status"],
+  "properties": {
+    "version": {"const": "1.0"},
+    "revision": {"type": "integer", "minimum": 1},
+    "title": {"type": "string", "minLength": 1},
+    "premise": {"type": "string", "minLength": 1},
+    "synopsis": {"type": "string", "minLength": 1},
+    "narrative": {"type": "object", "required": ["beginning", "escalation", "climax", "resolution"], "properties": {"beginning": {"type": "string", "minLength": 1}, "escalation": {"type": "string", "minLength": 1}, "climax": {"type": "string", "minLength": 1}, "resolution": {"type": "string", "minLength": 1}}, "additionalProperties": false},
+    "genre": {"type": "string"},
+    "tone": {"type": "string"},
+    "visual_style": {"type": "string"},
+    "target_duration_seconds": {"type": "number", "exclusiveMinimum": 0},
+    "story": {"type": "string"},
+    "characters": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}, "uniqueItems": true},
+    "locations": {"type": "array", "items": {"type": "string"}},
+    "scenes": {"type": "array", "items": {"type": "object"}},
+    "dialogue": {"type": "array", "items": {"type": "object"}},
+    "status": {"enum": ["DRAFT", "AWAITING_APPROVAL", "LOCKED"]},
+    "approval": {
+      "type": "object",
+      "required": ["approved_by", "approved_at"],
+      "properties": {
+        "approved_by": {"type": "string", "minLength": 1},
+        "approved_at": {"type": "string", "format": "date-time"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [{"if": {"properties": {"status": {"const": "LOCKED"}}}, "then": {"required": ["approval"]}}],
+  "additionalProperties": false
+}

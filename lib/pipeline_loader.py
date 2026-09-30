@@ -22,7 +22,7 @@ SCHEMA_PATH = (
 
 
 def _load_manifest_schema() -> dict:
-    with open(SCHEMA_PATH) as f:
+    with open(SCHEMA_PATH, encoding="utf-8-sig") as f:
         return json.load(f)
 
 
@@ -41,7 +41,7 @@ def load_pipeline(name: str, defs_dir: Optional[Path] = None) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"Pipeline manifest not found: {path}")
 
-    with open(path) as f:
+    with open(path, encoding="utf-8-sig") as f:
         manifest = yaml.safe_load(f)
 
     schema = _load_manifest_schema()

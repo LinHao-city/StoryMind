@@ -143,14 +143,14 @@ EXPECTED_WORKFLOWS = [
 def test_workflow_exists_and_valid_json(filename):
     path = WORKFLOW_DIR / filename
     assert path.exists(), f"Missing workflow: {path}"
-    with open(path) as f:
+    with open(path, encoding="utf-8-sig") as f:
         data = json.load(f)
     assert isinstance(data, dict)
     assert len(data) > 0
 
 
 def test_flux2_workflow_has_templated_nodes():
-    with open(WORKFLOW_DIR / "flux2-txt2img.json") as f:
+    with open(WORKFLOW_DIR / "flux2-txt2img.json", encoding="utf-8-sig") as f:
         w = json.load(f)
     assert "4" in w  # CLIPTextEncode (prompt)
     assert "7" in w  # RandomNoise (seed)
@@ -158,7 +158,7 @@ def test_flux2_workflow_has_templated_nodes():
 
 
 def test_i2v_workflow_has_templated_nodes():
-    with open(WORKFLOW_DIR / "wan22-i2v-4step.json") as f:
+    with open(WORKFLOW_DIR / "wan22-i2v-4step.json", encoding="utf-8-sig") as f:
         w = json.load(f)
     assert "93" in w   # CLIPTextEncode (prompt)
     assert "97" in w   # LoadImage (reference)
@@ -167,7 +167,7 @@ def test_i2v_workflow_has_templated_nodes():
 
 
 def test_t2v_workflow_has_templated_nodes():
-    with open(WORKFLOW_DIR / "wan22-t2v-4step.json") as f:
+    with open(WORKFLOW_DIR / "wan22-t2v-4step.json", encoding="utf-8-sig") as f:
         w = json.load(f)
     assert "2" in w   # CLIPTextEncode (prompt)
     assert "12" in w  # KSamplerAdvanced (seed)

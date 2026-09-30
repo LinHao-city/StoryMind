@@ -72,16 +72,15 @@ def _load_skill(skill_ref: str) -> tuple[Path, str]:
 ALL_MANIFESTS = sorted(PIPELINE_DIR.glob("*.yaml"))
 assert ALL_MANIFESTS, "No pipeline manifests found"
 
-# Test-only pipelines that don't compose final video go on this list with
-# an explicit reason. Everything else is required to follow the contract.
-_EXCLUDED_PIPELINES = {
-    "framework-smoke": "minimal 2-stage smoke test, no compose stage",
-}
+# Runtime selection is required only when a pipeline reaches composition.
+def _reaches_compose(path: Path) -> bool:
+    """Only pipelines with a composition stage need runtime selection."""
+    return any(stage.get("name") == "compose" for stage in _load_manifest(path).get("stages", []))
 
 
 @pytest.mark.parametrize(
     "manifest_path",
-    [p for p in ALL_MANIFESTS if p.stem not in _EXCLUDED_PIPELINES],
+    [p for p in ALL_MANIFESTS if _reaches_compose(p)],
     ids=lambda p: p.stem,
 )
 def test_planning_skill_mentions_runtime_contract(manifest_path: Path):
@@ -91,7 +90,7 @@ def test_planning_skill_mentions_runtime_contract(manifest_path: Path):
     planning = _planning_stages(manifest)
     assert planning, (
         f"Pipeline {manifest_path.stem} has no 'proposal' or 'idea' stage. "
-        f"Add one, or add this pipeline to _EXCLUDED_PIPELINES with a reason."
+        f"Add a planning stage with the runtime choice."
     )
 
     # At least ONE of the planning skills in this pipeline must cover the
@@ -126,7 +125,7 @@ def test_planning_skill_mentions_runtime_contract(manifest_path: Path):
 
 @pytest.mark.parametrize(
     "manifest_path",
-    [p for p in ALL_MANIFESTS if p.stem not in _EXCLUDED_PIPELINES],
+    [p for p in ALL_MANIFESTS if _reaches_compose(p)],
     ids=lambda p: p.stem,
 )
 def test_compose_stage_references_runtime_routing(manifest_path: Path):

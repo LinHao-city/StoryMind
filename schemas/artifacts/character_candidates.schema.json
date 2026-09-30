@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "StoryMind/artifacts/character_candidates",
+  "title": "Character Film Candidate Selections",
+  "type": "object",
+  "required": ["version", "story_fingerprint", "selections"],
+  "properties": {
+    "version": {"const": "1.0"},
+    "story_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "selections": {"type": "array", "minItems": 1, "items": {
+      "type": "object",
+      "required": ["character_id", "trait_profile", "fictionalization_level", "candidates", "selected_candidate_id", "approval"],
+      "properties": {
+        "character_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "trait_profile": {"type": "string", "minLength": 1},
+        "fictionalization_level": {"type": "integer", "minimum": 1, "maximum": 5},
+        "candidates": {"type": "array", "minItems": 1, "items": {
+          "type": "object", "required": ["id", "asset"],
+          "properties": {
+            "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+            "asset": {"type": "object", "required": ["path", "sha256", "origin", "provider", "model", "prompt"],
+              "properties": {"path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "origin": {"const": "generated"}, "provider": {"type": "string", "minLength": 1},
+                "model": {"type": "string", "minLength": 1}, "prompt": {"type": "string", "minLength": 1},
+                "seed": {"type": ["integer", "null"]}, "format": {"type": "string"},
+                "width": {"type": "integer"}, "height": {"type": "integer"}},
+              "additionalProperties": false}
+          }, "additionalProperties": false}
+        },
+        "selected_candidate_id": {"type": "string"},
+        "approval": {"type": "object", "required": ["approved_by", "approved_at"],
+          "properties": {"approved_by": {"const": "user"}, "approved_at": {"type": "string", "format": "date-time"}},
+          "additionalProperties": false}
+      }, "additionalProperties": false}
+    }
+  },
+  "additionalProperties": false
+}

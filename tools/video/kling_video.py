@@ -26,7 +26,7 @@ from tools.base_tool import (
 
 class KlingVideo(BaseTool):
     name = "kling_video"
-    version = "0.1.0"
+    version = "0.2.0"
     tier = ToolTier.GENERATE
     capability = "video_generation"
     provider = "kling"
@@ -42,10 +42,12 @@ class KlingVideo(BaseTool):
     )
     agent_skills = ["ai-video-gen"]
 
-    capabilities = ["text_to_video", "image_to_video"]
+    capabilities = ["text_to_video", "image_to_video", "character_elements"]
     supports = {
         "text_to_video": True,
         "image_to_video": True,
+        "character_elements": True,
+        "start_keyframe": True,
         "native_audio": True,
         "cinematic_quality": True,
     }
@@ -74,7 +76,7 @@ class KlingVideo(BaseTool):
             },
             "duration": {
                 "type": "string",
-                "enum": ["5", "10"],
+                "enum": [str(value) for value in range(3, 16)],
                 "default": "5",
                 "description": "Duration in seconds",
             },
@@ -84,6 +86,11 @@ class KlingVideo(BaseTool):
                 "default": "16:9",
             },
             "image_url": {"type": "string", "description": "Reference image URL for image_to_video"},
+            "start_image_url": {"type": "string", "description": "Kling v3 start keyframe URL"},
+            "end_image_url": {"type": "string", "description": "Optional Kling v3 end keyframe URL"},
+            "elements": {"type": "array", "items": {"type": "object"},
+                         "description": "Kling v3 character Elements with frontal_image_url and reference_image_urls"},
+            "generate_audio": {"type": "boolean"},
             "output_path": {"type": "string"},
         },
     }
@@ -107,6 +114,10 @@ class KlingVideo(BaseTool):
     def estimate_cost(self, inputs: dict[str, Any]) -> float:
         variant = inputs.get("model_variant", "v3/standard")
         duration = int(inputs.get("duration", "5"))
+        if variant == "v3/standard":
+            # fal's published v3 Standard rate is per generated second.
+            rate = 0.126 if inputs.get("generate_audio", False) else 0.084
+            return round(rate * duration, 4)
         if "master" in variant:
             return 0.30 * (duration / 5)
         if "pro" in variant:
@@ -115,6 +126,47 @@ class KlingVideo(BaseTool):
 
     def estimate_runtime(self, inputs: dict[str, Any]) -> float:
         return 60.0  # ~1 minute typical
+
+    @staticmethod
+    def build_payload(inputs: dict[str, Any]) -> dict[str, Any]:
+        """Adapt StoryMind references to the documented Kling endpoint schema."""
+        variant = inputs.get("model_variant", "v3/standard")
+        operation = inputs.get("operation", "text_to_video")
+        duration = str(inputs.get("duration", "5"))
+        if variant.startswith("v3/"):
+            if duration not in {str(value) for value in range(3, 16)}:
+                raise ValueError("Kling v3 duration must be 3-15 seconds")
+        elif duration not in {"5", "10"}:
+            raise ValueError("Kling v2 duration must be 5 or 10 seconds")
+        payload: dict[str, Any] = {"prompt": inputs["prompt"], "duration": duration}
+        if inputs.get("aspect_ratio"):
+            payload["aspect_ratio"] = inputs["aspect_ratio"]
+        if variant.startswith("v3/"):
+            if operation == "image_to_video":
+                start_url = inputs.get("start_image_url") or inputs.get("image_url")
+                if not start_url:
+                    raise ValueError("Kling v3 image_to_video requires start_image_url")
+                payload["start_image_url"] = start_url
+            if inputs.get("end_image_url"):
+                payload["end_image_url"] = inputs["end_image_url"]
+            if "generate_audio" in inputs:
+                payload["generate_audio"] = bool(inputs["generate_audio"])
+            if inputs.get("elements"):
+                elements = inputs["elements"]
+                for element in elements:
+                    refs = element.get("reference_image_urls", [])
+                    if not element.get("frontal_image_url") or not 1 <= len(refs) <= 3:
+                        raise ValueError("Kling element needs a frontal image and 1-3 reference images")
+                payload["elements"] = elements
+        else:
+            if inputs.get("elements") or inputs.get("end_image_url"):
+                raise ValueError("Character Elements and end keyframes require Kling v3")
+            if operation == "image_to_video":
+                image_url = inputs.get("image_url") or inputs.get("start_image_url")
+                if not image_url:
+                    raise ValueError("Kling image_to_video requires image_url")
+                payload["image_url"] = image_url
+        return payload
 
     def execute(self, inputs: dict[str, Any]) -> ToolResult:
         api_key = self._get_api_key()
@@ -133,13 +185,10 @@ class KlingVideo(BaseTool):
         operation_path = operation.replace("_", "-")
         model_path = f"kling-video/{variant}/{operation_path}"
 
-        payload: dict[str, Any] = {"prompt": inputs["prompt"]}
-        if inputs.get("duration"):
-            payload["duration"] = inputs["duration"]
-        if inputs.get("aspect_ratio"):
-            payload["aspect_ratio"] = inputs["aspect_ratio"]
-        if operation == "image_to_video" and inputs.get("image_url"):
-            payload["image_url"] = inputs["image_url"]
+        try:
+            payload = self.build_payload(inputs)
+        except (KeyError, ValueError) as exc:
+            return ToolResult(success=False, error=str(exc))
 
         headers = {
             "Authorization": f"Key {api_key}",
@@ -160,7 +209,8 @@ class KlingVideo(BaseTool):
             response_url = queue_data["response_url"]
 
             # Poll until complete
-            while True:
+            deadline = time.monotonic() + 900
+            while time.monotonic() < deadline:
                 time.sleep(5)
                 status_resp = requests.get(status_url, headers=headers, timeout=15)
                 status_resp.raise_for_status()
@@ -172,6 +222,8 @@ class KlingVideo(BaseTool):
                         success=False,
                         error=f"Kling video generation {status.lower()}",
                     )
+            else:
+                return ToolResult(success=False, error="Kling generation timed out after 15 minutes")
 
             # Fetch result
             result_resp = requests.get(response_url, headers=headers, timeout=30)
